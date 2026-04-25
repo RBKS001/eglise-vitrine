@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { churchInfo } from "../data/church";
+import { socialLinks } from "../data/socialLinks";
 import {
   FaFacebookF,
   FaInstagram,
@@ -20,7 +22,7 @@ const slides = [
   {
     image: "/images/story/slide-2.jpg",
     eyebrow: "Combat",
-    title: "Je portais des luttes silencieuses.",
+    title: "Je vivais des luttes silencieuses.",
     text: "À l’extérieur tout semblait normal, mais à l’intérieur j’étais fatigué, perdu et sans direction.",
   },
   {
@@ -32,64 +34,46 @@ const slides = [
   {
     image: "/images/story/slide-4.jpg",
     eyebrow: "Transformation",
-    title: "Ma vie a commencé à prendre sens.",
+    title: "Ma vie a commencé à changer.",
     text: "Petit à petit, je suis passé de l’errance à une vie restaurée, alignée et plus profonde.",
   },
   {
     image: "/images/story/slide-5.jpg",
     eyebrow: "Aujourd’hui",
     title: "J’avance avec foi et espérance.",
-    text: "Ce n’est pas seulement une nouvelle habitude. C’est une nouvelle vie, une nouvelle identité, une nouvelle direction.",
+    text: "Ce n’est pas seulement une nouvelle habitude. C’est une nouvelle vie, une nouvelle direction.",
   },
 ];
 
-const platforms = [
-  {
-    name: "Facebook",
-    href: "https://www.facebook.com/profile.php?id=61556075159114",
-    description: "Retrouvez nos annonces, événements et moments de vie.",
-    icon: FaFacebookF,
-  },
-  {
-    name: "Instagram",
-    href: "https://instagram.com/ton-eglise",
-    description: "Découvrez l’atmosphère de notre communauté en images.",
-    icon: FaInstagram,
-  },
-  {
-    name: "TikTok",
-    href: "https://www.tiktok.com/@eglise_dieu_vivant?_r=1&_t=ZS-95jW4UB2lEG",
-    description: "Vidéos courtes, messages forts et extraits inspirants.",
-    icon: FaTiktok,
-  },
-  {
-    name: "WhatsApp",
-    href: "https://wa.me/243000000000",
-    description: "Écrivez-nous directement pour toute information utile.",
-    icon: FaWhatsapp,
-  },
-  {
-    name: "YouTube",
-    href: "http://www.youtube.com/@DieuVivantTV",
-    description: "Messages, temps forts et contenus vidéo plus complets.",
-    icon: FaYoutube,
-  },
-];
+function getSocialIcon(name: string) {
+  const lower = name.toLowerCase();
+
+  if (lower === "facebook") return FaFacebookF;
+  if (lower === "instagram") return FaInstagram;
+  if (lower === "tiktok") return FaTiktok;
+  if (lower === "whatsapp") return FaWhatsapp;
+  if (lower === "youtube") return FaYoutube;
+
+  return FaFacebookF;
+}
 
 export default function HomeExperience() {
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    if (!hasEntered) return;
+
     const interval = window.setInterval(() => {
       setActive((prev) => (prev + 1) % slides.length);
     }, 6000);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [hasEntered]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -98,6 +82,26 @@ export default function HomeExperience() {
   }, []);
 
   const currentSlide = useMemo(() => slides[active], [active]);
+
+  const handleEnter = async () => {
+    const audio = audioRef.current;
+
+    try {
+      if (audio) {
+        if (!audio.currentSrc) {
+          audio.load();
+        }
+        audio.muted = false;
+        await audio.play();
+        setPlaying(true);
+      }
+    } catch (error) {
+      console.error("Erreur audio :", error);
+      setPlaying(false);
+    } finally {
+      setHasEntered(true);
+    }
+  };
 
   const togglePlay = async () => {
     const audio = audioRef.current;
@@ -118,9 +122,6 @@ export default function HomeExperience() {
     } catch (error) {
       console.error("Erreur audio :", error);
       setPlaying(false);
-      alert(
-        "Le lecteur audio n’a pas réussi à démarrer. Recharge la page puis réessaie."
-      );
     }
   };
 
@@ -140,11 +141,8 @@ export default function HomeExperience() {
         Votre navigateur ne supporte pas l’audio HTML5.
       </audio>
 
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-        <section
-          id="accueil"
-          className="relative overflow-hidden bg-[#071918] text-white"
-        >
+      {!hasEntered ? (
+        <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#071918] px-6 py-12 text-white">
           <div className="absolute inset-0">
             <div className="absolute left-[-8rem] top-[-4rem] h-72 w-72 rounded-full bg-[#065156]/60 blur-3xl" />
             <div className="absolute right-[-6rem] top-24 h-80 w-80 rounded-full bg-[#FF5B04]/20 blur-3xl" />
@@ -152,307 +150,458 @@ export default function HomeExperience() {
           </div>
 
           <div
-            className="absolute inset-0 opacity-40"
+            className="absolute inset-0 opacity-25"
             style={{
-              backgroundImage: `linear-gradient(
-                to right,
-                rgba(3,17,15,0.72),
-                rgba(6,52,54,0.48),
-                rgba(255,91,4,0.14)
-              ), url(${currentSlide.image})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              backgroundImage:
+                "linear-gradient(to bottom, rgba(3,17,15,0.72), rgba(6,52,54,0.56), rgba(255,91,4,0.18))",
             }}
           />
 
-          <header className="relative z-20 px-4 pt-4 md:px-8">
-            <div className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/10 bg-[#082321]/70 px-5 py-4 text-white backdrop-blur-xl md:px-8">
-              <a href="#accueil" className="text-xl font-extrabold tracking-tight">
-                {churchInfo.shortName}
-                <span className="text-[#FF5B04]">.</span>
-              </a>
-
-              <nav className="hidden items-center gap-8 md:flex">
-                <a
-                  href="#histoire"
-                  className="text-sm text-white/75 transition hover:text-white"
-                >
-                  Histoire
-                </a>
-                <a
-                  href="#plateformes"
-                  className="text-sm text-white/75 transition hover:text-white"
-                >
-                  Plateformes
-                </a>
-                <a
-                  href="#contact"
-                  className="text-sm text-white/75 transition hover:text-white"
-                >
-                  Contact
-                </a>
-              </nav>
-
-              <a
-                href={churchInfo.whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full bg-[#FF5B04] px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-              >
-                WhatsApp
-              </a>
+          <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center rounded-[2rem] border border-white/10 bg-white/5 px-8 py-10 text-center backdrop-blur-xl md:px-12 md:py-14">
+            <div className="relative h-36 w-36 overflow-hidden rounded-full border border-white/15 bg-black/30 shadow-2xl md:h-44 md:w-44">
+              <Image
+                src="/images/brand/logoEEDV.jpg"
+                alt="Logo EEDV"
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
-          </header>
 
-          <div className="relative z-10 mx-auto max-w-7xl px-6 pb-20 pt-24 md:px-8 md:pt-28">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="max-w-4xl">
-                <p className="inline-flex rounded-full border border-white/12 bg-white/10 px-4 py-2 text-sm uppercase tracking-[0.28em] text-white/80">
-                  {currentSlide.eyebrow}
-                </p>
+            <p className="mt-8 text-sm font-bold uppercase tracking-[0.35em] text-[#FF5B04]">
+              Bienvenue
+            </p>
 
-                <h1 className="mt-7 text-5xl font-extrabold leading-[0.95] md:text-7xl xl:text-[6rem]">
-                  {currentSlide.title}
-                </h1>
+            <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-tight text-white md:text-6xl">
+              Église Évangélique Dieu Vivant
+            </h1>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80 md:text-xl">
-                  {currentSlide.text}
-                </p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/78">
+              Un lieu pour rencontrer Dieu, retrouver la paix et avancer avec
+              espérance.
+            </p>
 
-                <div className="mt-9 flex flex-wrap gap-4">
+            <button
+              onClick={handleEnter}
+              className="mt-10 rounded-full bg-[#FF5B04] px-8 py-4 text-base font-semibold text-white transition hover:scale-[1.02] hover:bg-[#ff6a1a]"
+            >
+              Découvrir l&apos;église
+            </button>
+          </div>
+        </section>
+      ) : (
+        <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+          <section
+            id="accueil"
+            className="relative overflow-hidden bg-[#071918] text-white"
+          >
+            <div className="absolute inset-0">
+              <div className="absolute left-[-8rem] top-[-4rem] h-72 w-72 rounded-full bg-[#065156]/60 blur-3xl" />
+              <div className="absolute right-[-6rem] top-24 h-80 w-80 rounded-full bg-[#FF5B04]/20 blur-3xl" />
+              <div className="absolute bottom-[-8rem] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#0b6a70]/40 blur-3xl" />
+            </div>
+
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                backgroundImage: `linear-gradient(
+                  to right,
+                  rgba(3,17,15,0.72),
+                  rgba(6,52,54,0.48),
+                  rgba(255,91,4,0.14)
+                ), url(${currentSlide.image})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+
+            <header className="relative z-20 px-4 pt-4 md:px-8">
+              <div className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/10 bg-[#082321]/70 px-5 py-4 text-white backdrop-blur-xl md:px-8">
+                <a href="#accueil" className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-black/20">
+                    <Image
+                      src="/images/brand/logoEEDV.jpg"
+                      alt="Logo EEDV"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <span className="text-xl font-extrabold tracking-tight">
+                    {churchInfo.shortName}
+                    <span className="text-[#FF5B04]">.</span>
+                  </span>
+                </a>
+
+                <nav className="hidden items-center gap-8 md:flex">
+                  <a
+                    href="#histoire"
+                    className="text-sm text-white/75 transition hover:text-white"
+                  >
+                    Histoire
+                  </a>
                   <a
                     href="#plateformes"
-                    className="rounded-full bg-white px-7 py-4 font-semibold text-[#063336] transition hover:scale-[1.02]"
+                    className="text-sm text-white/75 transition hover:text-white"
                   >
-                    Découvrir l’église
+                    Plateformes
                   </a>
-
                   <a
                     href="#contact"
-                    className="rounded-full border border-white/14 bg-white/10 px-7 py-4 font-semibold text-white transition hover:bg-white/15"
+                    className="text-sm text-white/75 transition hover:text-white"
                   >
-                    Nous contacter
+                    Contact
                   </a>
-                </div>
+                </nav>
 
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <button
-                    onClick={togglePlay}
-                    className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  >
-                    {playing ? "Mettre la musique en pause" : "Lancer la musique"}
-                  </button>
-
-                  <button
-                    onClick={toggleMute}
-                    className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  >
-                    {muted ? "Activer le son" : "Couper le son"}
-                  </button>
-                </div>
+                <a
+                  href={churchInfo.whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full bg-[#FF5B04] px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
+                >
+                  WhatsApp
+                </a>
               </div>
+            </header>
 
-              <div className="glass hero-shadow rounded-[2rem] border border-white/10 p-6 text-white">
-                <p className="text-sm uppercase tracking-[0.35em] text-white/60">
-                  Message d’espérance
-                </p>
-
-                <h2 className="mt-4 text-3xl font-bold leading-tight">
-                  En Jésus-Christ, il y a une rencontre, une transformation, une vie nouvelle.
-                </h2>
-
-                <p className="mt-5 text-base leading-7 text-white/75">
-                  Cette série d’images raconte un chemin intérieur : la recherche,
-                  la fatigue, la rencontre, puis la transformation.
-                </p>
-
-                <div className="mt-8 grid gap-3">
-                  <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
-                    Une grâce qui relève
-                  </div>
-                  <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
-                    Une vérité qui transforme
-                  </div>
-                  <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
-                    Une espérance qui demeure
-                  </div>
-                </div>
-
-                <div className="mt-8 rounded-[1.5rem] bg-white/10 p-5">
-                  <p className="text-sm text-white/60">Notre conviction</p>
-                  <p className="mt-2 text-lg font-semibold">
-                    Là où Christ entre, la vie change.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="histoire" className="relative px-6 py-20 md:px-8">
-          <div className="mx-auto max-w-7xl story-section-shell">
-            <div className="story-section-inner">
-              <div className="story-header">
+            <div className="relative z-10 mx-auto max-w-7xl px-6 pb-20 pt-24 md:px-8 md:pt-28">
+              <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
                 <div className="max-w-4xl">
-                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--accent)]">
-                    Une histoire
+                  <p className="inline-flex rounded-full border border-white/12 bg-white/10 px-4 py-2 text-sm uppercase tracking-[0.28em] text-white/80">
+                    {currentSlide.eyebrow}
                   </p>
 
-                  <h2 className="mt-4 text-4xl font-extrabold tracking-tight text-[var(--primary)] md:text-6xl">
-                    Une transformation intérieure, racontée avec vérité et espérance
+                  <h1 className="mt-7 text-5xl font-extrabold leading-[0.95] md:text-7xl xl:text-[6rem]">
+                    {currentSlide.title}
+                  </h1>
+
+                  <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80 md:text-xl">
+                    {currentSlide.text}
+                  </p>
+
+                  <div className="mt-9 flex flex-wrap gap-4">
+                    <a
+                      href="#plateformes"
+                      className="rounded-full bg-white px-7 py-4 font-semibold text-[#063336] transition hover:scale-[1.02]"
+                    >
+                      Découvrir l’église
+                    </a>
+
+                    <a
+                      href="#contact"
+                      className="rounded-full border border-white/14 bg-white/10 px-7 py-4 font-semibold text-white transition hover:bg-white/15"
+                    >
+                      Nous contacter
+                    </a>
+                  </div>
+
+                  <div className="mt-10 flex flex-wrap gap-3">
+                    <button
+                      onClick={togglePlay}
+                      className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    >
+                      {playing
+                        ? "Mettre la musique en pause"
+                        : "Mettre la musique"}
+                    </button>
+
+                    <button
+                      onClick={toggleMute}
+                      className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    >
+                      {muted ? "Activer le son" : "Couper le son"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="glass hero-shadow rounded-[2rem] border border-white/10 p-6 text-white">
+                  <p className="text-sm uppercase tracking-[0.35em] text-white/60">
+                    Message d’espérance
+                  </p>
+
+                  <h2 className="mt-4 text-3xl font-bold leading-tight">
+                    En Jésus-Christ, il y a une rencontre, une transformation,
+                    une vie nouvelle.
                   </h2>
 
-                  <p className="mt-6 max-w-5xl text-lg leading-8 text-slate-600 md:text-[1.35rem]">
-                    Chaque étape traduit une réalité du cœur humain : l’errance,
-                    le combat, la rencontre avec la lumière, puis la restauration.
-                    Ces images accompagnent un chemin de transformation profonde.
+                  <p className="mt-5 text-base leading-7 text-white/75">
+                    Cette série d’images raconte un chemin intérieur : la
+                    recherche, la fatigue, la rencontre, puis la transformation.
                   </p>
-                </div>
-              </div>
 
-              <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                {[
-                  {
-                    title: "Avant",
-                    text: "Un cœur en quête de sens, une vie sans direction claire, une paix encore absente.",
-                    image: "/images/story-cards/avant.jpg",
-                  },
-                  {
-                    title: "Combat",
-                    text: "Des luttes invisibles, du bruit intérieur, de la fatigue… et le désir sincère d’un changement réel.",
-                    image: "/images/story-cards/combat.jpg",
-                  },
-                  {
-                    title: "Rencontre",
-                    text: "Un instant de lumière, de vérité et d’ouverture intérieure, où l’espérance commence à renaître.",
-                    image: "/images/story-cards/rencontre.jpg",
-                  },
-                  {
-                    title: "Transformation",
-                    text: "Une vie relevée, une espérance retrouvée, et une marche nouvelle qui commence.",
-                    image: "/images/story-cards/transformation.jpg",
-                  },
-                ].map((item) => (
-                  <div key={item.title} className="story-card-lite group">
-                    <div
-                      className="story-card-lite-image"
-                      style={{ backgroundImage: `url(${item.image})` }}
-                    />
-
-                    <div className="story-chip">{item.title}</div>
-
-                    <div className="story-card-panel">
-                      <h3>{item.title}</h3>
-                      <p>{item.text}</p>
+                  <div className="mt-8 grid gap-3">
+                    <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
+                      Une grâce qui relève
+                    </div>
+                    <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
+                      Une vérité qui transforme
+                    </div>
+                    <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">
+                      Une espérance qui demeure
                     </div>
                   </div>
-                ))}
+
+                  <div className="mt-8 rounded-[1.5rem] bg-white/10 p-5">
+                    <p className="text-sm text-white/60">Notre conviction</p>
+                    <p className="mt-2 text-lg font-semibold">
+                      Là où Christ entre, la vie change.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section id="plateformes" className="px-6 py-24 md:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--accent)]">
-                Plateformes officielles
-              </p>
-
-              <h2 className="mt-4 text-4xl font-extrabold text-[var(--primary)] md:text-5xl">
-                Suivez la vie de l’église
-              </h2>
-
-              <p className="mt-5 text-lg leading-8 text-slate-600">
-                Une présence digitale cohérente, sobre et actuelle pour rester connecté
-                à la communauté.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {platforms.map((platform) => {
-                const Icon = platform.icon;
-
-                return (
-                  <a
-                    key={platform.name}
-                    href={platform.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group rounded-[2rem] border border-slate-200 bg-white p-9 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.10)]"
-                  >
-                    <div className="mb-8 flex h-18 w-18 items-center justify-center rounded-[1.25rem] bg-[#065156] text-white">
-                      <Icon className="h-8 w-8" />
-                    </div>
-
-                    <h3 className="text-2xl font-semibold text-slate-950">
-                      {platform.name}
-                    </h3>
-
-                    <p className="mt-5 text-lg leading-9 text-slate-600">
-                      {platform.description}
+          <section id="histoire" className="relative px-6 py-20 md:px-8">
+            <div className="mx-auto max-w-7xl story-section-shell">
+              <div className="story-section-inner">
+                <div className="story-header">
+                  <div className="max-w-4xl">
+                    <p className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--accent)]">
+                      Une histoire
                     </p>
 
-                    <span className="mt-8 inline-flex items-center text-lg font-semibold text-[#FF5B04] transition group-hover:translate-x-1">
-                      Ouvrir la plateforme →
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+                    <h2 className="mt-4 text-4xl font-extrabold tracking-tight text-[var(--primary)] md:text-6xl">
+                      Une transformation intérieure, racontée avec vérité et
+                      espérance
+                    </h2>
 
-        <section id="contact" className="px-6 pb-24 md:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="hero-shadow rounded-[2rem] bg-[var(--primary)] p-8 text-white md:p-10">
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-white/70">
-                  Contact
+                    <p className="mt-6 max-w-5xl text-lg leading-8 text-slate-600 md:text-[1.35rem]">
+                      Chaque étape traduit une réalité du cœur humain :
+                      l’errance, le combat, la rencontre avec la lumière, puis
+                      la restauration. Ces images accompagnent un chemin de
+                      transformation profonde.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    {
+                      title: "Avant",
+                      text: "Un cœur en quête de sens, une vie sans direction claire, une paix encore absente.",
+                      image: "/images/story-cards/avant.jpg",
+                    },
+                    {
+                      title: "Combat",
+                      text: "Des luttes invisibles, du bruit intérieur, de la fatigue… et le désir sincère d’un changement réel.",
+                      image: "/images/story-cards/combat.jpg",
+                    },
+                    {
+                      title: "Rencontre",
+                      text: "Un instant de lumière, de vérité et d’ouverture intérieure, où l’espérance commence à renaître.",
+                      image: "/images/story-cards/rencontre.jpg",
+                    },
+                    {
+                      title: "Transformation",
+                      text: "Une vie relevée, une espérance retrouvée, et une marche nouvelle qui commence.",
+                      image: "/images/story-cards/transformation.jpg",
+                    },
+                  ].map((item) => (
+                    <div key={item.title} className="story-card-lite group">
+                      <div
+                        className="story-card-lite-image"
+                        style={{ backgroundImage: `url(${item.image})` }}
+                      />
+
+                      <div className="story-chip">{item.title}</div>
+
+                      <div className="story-card-panel">
+                        <h3>{item.title}</h3>
+                        <p>{item.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="plateformes" className="px-6 py-24 md:px-8">
+            <div className="mx-auto max-w-7xl">
+              <div className="mx-auto max-w-3xl text-center">
+                <p className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--accent)]">
+                  Plateformes officielles
                 </p>
 
-                <h2 className="mt-4 text-4xl font-extrabold md:text-5xl">
-                  Un pas peut tout changer.
+                <h2 className="mt-4 text-4xl font-extrabold text-[var(--primary)] md:text-5xl">
+                  Suivez la vie de l’église
                 </h2>
 
-                <p className="mt-5 max-w-xl text-lg leading-8 text-white/80">
-                  Besoin de parler, de prier, d’être orienté ou simplement de nous rencontrer ?
-                  Nous sommes là pour vous accueillir, vous écouter et marcher avec vous.
+                <p className="mt-5 text-lg leading-8 text-slate-600">
+                  Une présence digitale cohérente, sobre et actuelle pour
+                  rester connecté à la communauté.
                 </p>
+              </div>
 
-                <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {socialLinks.map((platform) => {
+                  const Icon = getSocialIcon(platform.name);
+
+                  return (
+                    <a
+                      key={platform.name}
+                      href={platform.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group rounded-[2rem] border border-slate-200 bg-white p-9 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.10)]"
+                    >
+                      <div className="mb-8 flex h-18 w-18 items-center justify-center rounded-[1.25rem] bg-[#065156] text-white">
+                        <Icon className="h-8 w-8" />
+                      </div>
+
+                      <h3 className="text-2xl font-semibold text-slate-950">
+                        {platform.name}
+                      </h3>
+
+                      <p className="mt-5 text-lg leading-9 text-slate-600">
+                        {platform.description}
+                      </p>
+
+                      <span className="mt-8 inline-flex items-center text-lg font-semibold text-[#FF5B04] transition group-hover:translate-x-1">
+                        Ouvrir la plateforme →
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <section id="contact" className="px-6 pb-16 md:px-8">
+            <div className="mx-auto max-w-7xl">
+              <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+                <div className="hero-shadow rounded-[2rem] bg-[var(--primary)] p-8 text-white md:p-10">
+                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-white/70">
+                    Contact
+                  </p>
+
+                  <h2 className="mt-4 text-4xl font-extrabold md:text-5xl">
+                    Un pas peut tout changer.
+                  </h2>
+
+                  <p className="mt-5 max-w-xl text-lg leading-8 text-white/80">
+                    Besoin de parler, de prier, d’être orienté ou simplement de
+                    nous rencontrer ? Nous sommes là pour vous accueillir, vous
+                    écouter et marcher avec vous.
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <a
+                      href={churchInfo.whatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full bg-[var(--accent)] px-7 py-4 font-semibold text-white transition hover:scale-[1.02]"
+                    >
+                      Ouvrir WhatsApp
+                    </a>
+                  </div>
+                </div>
+
+                <div className="grid gap-4">
+                  {[
+                    { label: "Adresse", value: churchInfo.address },
+                    { label: "Téléphone", value: churchInfo.phone },
+                    { label: "Email", value: churchInfo.email },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="soft-card rounded-[1.5rem] border border-[#dce6e2] bg-white p-6"
+                    >
+                      <p className="text-sm text-slate-500">{item.label}</p>
+                      <p className="mt-2 break-words text-lg font-semibold text-slate-900">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <footer className="px-4 pb-8 md:px-8">
+            <div className="mx-auto max-w-7xl rounded-full border border-white/10 bg-[#082321]/70 px-5 py-4 text-white backdrop-blur-xl md:px-8">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <a href="#accueil" className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-black/20">
+                    <Image
+                      src="/images/brand/logoEEDV.jpg"
+                      alt="Logo EEDV"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <span className="text-xl font-extrabold tracking-tight">
+                    {churchInfo.shortName}
+                    <span className="text-[#FF5B04]">.</span>
+                  </span>
+                </a>
+
+                <nav className="flex flex-wrap items-center gap-5 md:gap-8">
+                  <a
+                    href="#accueil"
+                    className="text-sm text-white/75 transition hover:text-white"
+                  >
+                    Accueil
+                  </a>
+                  <a
+                    href="#histoire"
+                    className="text-sm text-white/75 transition hover:text-white"
+                  >
+                    Histoire
+                  </a>
+                  <a
+                    href="#plateformes"
+                    className="text-sm text-white/75 transition hover:text-white"
+                  >
+                    Plateformes
+                  </a>
+                  <a
+                    href="#contact"
+                    className="text-sm text-white/75 transition hover:text-white"
+                  >
+                    Contact
+                  </a>
+                </nav>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {socialLinks.map((platform) => {
+                    const Icon = getSocialIcon(platform.name);
+
+                    return (
+                      <a
+                        key={platform.name}
+                        href={platform.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={platform.name}
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/20"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    );
+                  })}
+
                   <a
                     href={churchInfo.whatsappUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-full bg-[var(--accent)] px-7 py-4 font-semibold text-white transition hover:scale-[1.02]"
+                    className="rounded-full bg-[#FF5B04] px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
                   >
-                    Nous écrire sur WhatsApp
+                    WhatsApp
                   </a>
                 </div>
               </div>
-
-              <div className="grid gap-4">
-                {[
-                  { label: "Adresse", value: churchInfo.address },
-                  { label: "Téléphone", value: churchInfo.phone },
-                  { label: "Email", value: churchInfo.email },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="soft-card rounded-[1.5rem] border border-[#dce6e2] bg-white p-6"
-                  >
-                    <p className="text-sm text-slate-500">{item.label}</p>
-                    <p className="mt-2 break-words text-lg font-semibold text-slate-900">
-                      {item.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </div>
-          </div>
-        </section>
-      </main>
+
+            <p className="mt-4 text-center text-sm text-slate-500">
+              © 2026 {churchInfo.name}. Tous droits réservés.
+            </p>
+          </footer>
+        </main>
+      )}
     </>
   );
 }
