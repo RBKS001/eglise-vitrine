@@ -521,85 +521,37 @@ export default function HomeExperience() {
           </section>
 
           <footer className="px-4 pb-8 md:px-8">
-            <div className="mx-auto max-w-7xl rounded-full border border-white/10 bg-[#082321]/70 px-5 py-4 text-white backdrop-blur-xl md:px-8">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <a href="#accueil" className="flex items-center gap-3">
-                  <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-black/20">
-                    <Image
-                      src="/images/brand/logoEEDV.jpg"
-                      alt="Logo EEDV"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+  <div className="mx-auto max-w-7xl">
+    <div className="flex items-center justify-between rounded-full border border-white/10 bg-[#082a28]/90 px-5 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl md:px-8 md:py-5">
+      
+      {/* Bloc gauche : logo + nom */}
+      <a href="#accueil" className="flex items-center gap-4">
+        <div className="relative h-12 w-12 overflow-hidden rounded-full border border-white/15 bg-black/20 md:h-14 md:w-14">
+          <Image
+            src="/images/brand/logoEEDV.jpg"
+            alt="Logo EEDV"
+            fill
+            className="object-cover"
+          />
+        </div>
 
-                  <span className="text-xl font-extrabold tracking-tight">
-                    {churchInfo.shortName}
-                    <span className="text-[#FF5B04]">.</span>
-                  </span>
-                </a>
+        <span className="text-2xl font-extrabold tracking-tight text-white md:text-[2rem]">
+          EEDV<span className="text-[#FF6A00]">.</span>
+        </span>
+      </a>
 
-                <nav className="flex flex-wrap items-center gap-5 md:gap-8">
-                  <a
-                    href="#accueil"
-                    className="text-sm text-white/75 transition hover:text-white"
-                  >
-                    Accueil
-                  </a>
-                  <a
-                    href="#histoire"
-                    className="text-sm text-white/75 transition hover:text-white"
-                  >
-                    Histoire
-                  </a>
-                  <a
-                    href="#plateformes"
-                    className="text-sm text-white/75 transition hover:text-white"
-                  >
-                    Plateformes
-                  </a>
-                  <a
-                    href="#contact"
-                    className="text-sm text-white/75 transition hover:text-white"
-                  >
-                    Contact
-                  </a>
-                </nav>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  {socialLinks.map((platform) => {
-                    const Icon = getSocialIcon(platform.name);
-
-                    return (
-                      <a
-                        key={platform.name}
-                        href={platform.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={platform.name}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/20"
-                      >
-                        <Icon className="h-4 w-4" />
-                      </a>
-                    );
-                  })}
-
-                  <a
-                    href={churchInfo.whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full bg-[#FF5B04] px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                  >
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <p className="mt-4 text-center text-sm text-slate-500">
-              © 2026 {churchInfo.name}. Tous droits réservés.
-            </p>
-          </footer>
+      {/* Bouton droite */}
+      <a
+        href={churchInfo.whatsappUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center justify-center rounded-full bg-[#FF6A00] px-6 py-3 text-base font-semibold text-white transition hover:scale-[1.02] md:px-8 md:py-4 md:text-xl"
+      >
+        WhatsApp
+      </a>
+    </div>
+  </div>
+</footer>
         </main>
       )}
     </>
